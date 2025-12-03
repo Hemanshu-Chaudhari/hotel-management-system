@@ -17,7 +17,7 @@ function RoomTypes() {
   async function loadTypes() {
     try {
       setIsLoading(true);
-      const res = await api.get("/rooms/type");  // FIXED
+      const res = await api.get("/rooms/type");   // ✔ FIXED
       setRoomTypes(res.data);
     } catch (err) {
       console.error("Error loading room types:", err);
@@ -38,7 +38,7 @@ function RoomTypes() {
   async function addRoomType(e) {
     e.preventDefault();
     try {
-      await api.post("/rooms/type", {   // FIXED
+      await api.post("/rooms/type", {         // ✔ FIXED
         name: form.name,
         price: form.price,
         maxGuests: form.maxGuests,
@@ -51,7 +51,6 @@ function RoomTypes() {
 
       showToast("Room type added successfully", "success");
     } catch (err) {
-      console.log(err);
       showToast("Error adding type", "error");
     }
   }
@@ -61,7 +60,7 @@ function RoomTypes() {
     if (!window.confirm("Are you sure you want to delete this room type?")) return;
 
     try {
-      await api.delete(`/rooms/type/${id}`);  // FIXED
+      await api.delete(`/rooms/type/${id}`);    // ✔ FIXED (THIS WAS WRONG)
       setRoomTypes(prev => prev.filter(rt => rt._id !== id));
 
       showToast("Room type deleted successfully", "success");
@@ -71,7 +70,7 @@ function RoomTypes() {
   }
 
   function showToast(message, type = "info") {
-    alert(message);  // Simple fallback
+    alert(message);
   }
 
   return (
@@ -93,7 +92,7 @@ function RoomTypes() {
 
             <button
               onClick={() => setIsFormVisible(!isFormVisible)}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 group"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700"
             >
               {isFormVisible ? "Cancel" : "Add Room Type"}
             </button>
@@ -116,6 +115,7 @@ function RoomTypes() {
                 <form onSubmit={addRoomType} className="space-y-8">
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
                       <input
@@ -164,6 +164,7 @@ function RoomTypes() {
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
                       />
                     </div>
+
                   </div>
 
                   <div className="flex justify-end">
@@ -174,6 +175,7 @@ function RoomTypes() {
                       Create Room Type
                     </button>
                   </div>
+
                 </form>
               </div>
             </motion.div>
@@ -197,9 +199,7 @@ function RoomTypes() {
                 >
                   <h3 className="text-xl font-bold text-gray-900">{rt.name}</h3>
 
-                  <p className="text-gray-700 text-lg mt-2">
-                    ₹{rt.price} / night
-                  </p>
+                  <p className="text-gray-700 text-lg mt-2">₹{rt.price} / night</p>
 
                   <p className="text-gray-500 mt-2">Max Guests: {rt.maxGuests}</p>
 
@@ -221,6 +221,7 @@ function RoomTypes() {
               ))}
             </div>
           )}
+
         </div>
 
       </div>
