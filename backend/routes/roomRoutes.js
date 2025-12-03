@@ -69,4 +69,15 @@ router.put("/status/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete Room Type
+router.delete("/type/:id", authMiddleware, async (req, res) => {
+  try {
+    await RoomType.findByIdAndDelete(req.params.id);
+    res.json({ message: "Room type deleted" });
+  } catch (err) {
+    console.error("Delete Room Type Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;
