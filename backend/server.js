@@ -21,8 +21,7 @@ app.use(express.json());
 // DIRECT MongoDB Atlas Connection (No .env)
 // ------------------------------
 
-const MONGO_URI =
-  "mongodb+srv://hemanshu:hemanshu@cluster0.0yh5oie.mongodb.net/hotel_management?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI ="mongodb+srv://hemanshu:hemanshu@cluster0.0yh5oie.mongodb.net/hotel_management?retryWrites=true&w=majority&appName=Cluster0";
 
 async function connectDB() {
   try {
