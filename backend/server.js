@@ -2,7 +2,6 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-
 import authRoutes from "./routes/authRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
@@ -17,20 +16,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ------------------------------
-// DIRECT MongoDB Atlas Connection (No .env)
-// ------------------------------
-
-const MONGO_URI ="mongodb+srv://hemanshu:hemanshu@cluster0.0yh5oie.mongodb.net/hotel_management?retryWrites=true&w=majority&appName=Cluster0";
-
+// MongoDB connect
 async function connectDB() {
   try {
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    console.log("MongoDB connected successfully (Atlas)");
+    await mongoose.connect("mongodb+srv://hemanshu:hemanshu@cluster0.0yh5oie.mongodb.net/?appName=Cluster0");
+    console.log("MongoDB connected");
   } catch (err) {
     console.error("DB connection error:", err);
   }
@@ -40,6 +30,7 @@ connectDB();
 // Routes
 app.use("/api/auth", authRoutes);
 
+// Test route
 app.get("/", (req, res) => {
   res.send("Hotel Management Backend running...");
 });
@@ -51,9 +42,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/invoice", invoiceRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// PORT (Render assigns automatically)
-const PORT = process.env.PORT || 4000;
-
+const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,28 +1,22 @@
 import { useEffect, useState } from "react";
 import api from "../api";
-import { motion, AnimatePresence } from "framer-motion";
 
 function RoomTypes() {
   const [roomTypes, setRoomTypes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [form, setForm] = useState({
     name: "",
     price: "",
     maxGuests: "",
     features: ""
   });
-  const [isFormVisible, setIsFormVisible] = useState(false);
 
-  // Load Room Types
+  // LOAD ROOM TYPES
   async function loadTypes() {
     try {
-      setIsLoading(true);
-      const res = await api.get("/rooms/type");   // ✔ FIXED
+      const res = await api.get("/rooms/type");  // ✔ Correct Route
       setRoomTypes(res.data);
     } catch (err) {
-      console.error("Error loading room types:", err);
-    } finally {
-      setIsLoading(false);
+      console.error("Load Room Types Error:", err);
     }
   }
 
@@ -34,196 +28,140 @@ function RoomTypes() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // Add Room Type
+  // ADD ROOM TYPE
   async function addRoomType(e) {
     e.preventDefault();
     try {
-      await api.post("/rooms/type", {         // ✔ FIXED
-        name: form.name,
-        price: form.price,
-        maxGuests: form.maxGuests,
-        features: form.features.split(",").map(f => f.trim()).filter(f => f),
-      });
+      await api.post(
+        "/rooms/type",                                  // ✔ Correct Route
+        {
+          name: form.name,
+          price: form.price,
+          maxGuests: form.maxGuests,
+          features: form.features.split(","),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // ✔ Required
+          },
+        }
+      );
 
       setForm({ name: "", price: "", maxGuests: "", features: "" });
-      setIsFormVisible(false);
       loadTypes();
-
-      showToast("Room type added successfully", "success");
     } catch (err) {
-      showToast("Error adding type", "error");
+      alert(err.response?.data?.message || "Error adding type");
     }
   }
 
-  // Delete Room Type
+  // DELETE ROOM TYPE
   async function deleteType(id) {
-    if (!window.confirm("Are you sure you want to delete this room type?")) return;
+    if (!confirm("Delete room type?")) return;
 
     try {
-      await api.delete(`/rooms/type/${id}`);    // ✔ FIXED (THIS WAS WRONG)
-      setRoomTypes(prev => prev.filter(rt => rt._id !== id));
-
-      showToast("Room type deleted successfully", "success");
+      await api.delete(`/rooms/type/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      loadTypes();
     } catch (err) {
-      showToast("Error deleting room type", "error");
+      alert("Error deleting type");
     }
-  }
-
-  function showToast(message, type = "info") {
-    alert(message);
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-6xl mx-auto p-6">
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
+      <h1 className="text-3xl font-bold mb-6 text-gray-700">
+        Room Types Management
+      </h1>
+
+      {/* ADD FORM */}
+      <div className="bg-white p-5 shadow-lg rounded-xl mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-blue-600">
+          ➕ Add Room Type
+        </h2>
+
+        <form
+          onSubmit={addRoomType}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4"
         >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Room Types</h1>
-              <p className="text-gray-600">Manage and configure your hotel's room offerings</p>
-            </div>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Room Type Name"
+            className="border p-3 rounded"
+          />
 
-            <button
-              onClick={() => setIsFormVisible(!isFormVisible)}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700"
-            >
-              {isFormVisible ? "Cancel" : "Add Room Type"}
-            </button>
-          </div>
-        </motion.div>
+          <input
+            name="price"
+            type="number"
+            value={form.price}
+            onChange={handleChange}
+            placeholder="Price / Night"
+            className="border p-3 rounded"
+          />
 
-        {/* Add Room Type Form */}
-        <AnimatePresence>
-          {isFormVisible && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-12 overflow-hidden"
-            >
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Room Type</h2>
+          <input
+            name="maxGuests"
+            type="number"
+            value={form.maxGuests}
+            onChange={handleChange}
+            placeholder="Max Guests"
+            className="border p-3 rounded"
+          />
 
-                <form onSubmit={addRoomType} className="space-y-8">
+          <input
+            name="features"
+            value={form.features}
+            onChange={handleChange}
+            placeholder="Features (comma separated)"
+            className="border p-3 rounded"
+          />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <button className="col-span-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700">
+            Add Type
+          </button>
+        </form>
+      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        placeholder="Deluxe Suite"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
-                        required
-                      />
-                    </div>
+      {/* LIST VIEW */}
+      <h2 className="text-2xl font-semibold mb-4">All Room Types</h2>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Price / Night</label>
-                      <input
-                        name="price"
-                        type="number"
-                        value={form.price}
-                        onChange={handleChange}
-                        placeholder="4500"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
-                        required
-                      />
-                    </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {roomTypes.map((rt) => (
+          <div
+            key={rt._id}
+            className="bg-white p-5 shadow rounded-xl border hover:shadow-xl transition"
+          >
+            <h3 className="text-xl font-bold text-gray-700 mb-2">{rt.name}</h3>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Max Guests</label>
-                      <input
-                        name="maxGuests"
-                        type="number"
-                        value={form.maxGuests}
-                        onChange={handleChange}
-                        placeholder="4"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
-                        required
-                      />
-                    </div>
+            <p className="mb-1"><b>Price:</b> ₹{rt.price}</p>
+            <p className="mb-3"><b>Max Guests:</b> {rt.maxGuests}</p>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Features</label>
-                      <input
-                        name="features"
-                        value={form.features}
-                        onChange={handleChange}
-                        placeholder="AC, TV, Wifi"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
-                      />
-                    </div>
-
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="px-8 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-                    >
-                      Create Room Type
-                    </button>
-                  </div>
-
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Room Types List */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">All Room Types</h2>
-
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : roomTypes.length === 0 ? (
-            <div>No Room Types</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {roomTypes.map((rt) => (
-                <motion.div
-                  key={rt._id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+            {/* Features */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {rt.features.map((f, i) => (
+                <span
+                  key={i}
+                  className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm"
                 >
-                  <h3 className="text-xl font-bold text-gray-900">{rt.name}</h3>
-
-                  <p className="text-gray-700 text-lg mt-2">₹{rt.price} / night</p>
-
-                  <p className="text-gray-500 mt-2">Max Guests: {rt.maxGuests}</p>
-
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {rt.features.map((f, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 rounded-lg text-sm">
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => deleteType(rt._id)}
-                    className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg"
-                  >
-                    Delete
-                  </button>
-                </motion.div>
+                  {f}
+                </span>
               ))}
             </div>
-          )}
 
-        </div>
-
+            {/* Delete */}
+            <button
+              onClick={() => deleteType(rt._id)}
+              className="bg-red-600 text-white w-full py-2 rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
